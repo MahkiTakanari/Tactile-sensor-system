@@ -1,13 +1,13 @@
-if ~exist("s", "var") || ~isvalid(s)
-    s = serialport("COM5", 9600);
-    configureTerminator(s, "CR/LF");
-    disp("s SETTING")
+if ~exist("s_stage", "var") || ~isvalid(s_stage)
+    s_stage = serialport("COM5", 9600);
+    configureTerminator(s_stage, "CR/LF");
+    disp("s_stage SETTING")
 end
 
-if ~exist("d", "var") || ~isvalid(d)
-    d = daq("ni");
-    addinput(d, "cDAQ1Mod1", "ai0", "Voltage");
-    d.Rate = 5000;
+if ~exist("daqStG", "var") || ~isvalid(daqStG)
+    daqStG = daq("ni");
+    addinput(daqStG, "cDAQ1Mod1", "ai0", "Voltage");
+    daqStG.Rate = 5000;
 end
 
 
@@ -22,22 +22,22 @@ e_min = 0.1; %誤差0.1VのときD:A10
 alpha = -log(v_min / v_max) / (e_max - abs(e_min));
 % //////////////////////////////
 
-Command(s, "MGO:A1750");
+Command(s_stage, "MGO:A1350");
 pause(0.3)
 
 % 段階ごとの誤差しきい値（高い方から順）
 thresholds = [0.55, 0.35, 0.15, 0.05];
 applied = false(size(thresholds));  % 各段階で速度変更したかどうか記録
 
-cmd = sprintf("D:A%d,2000,10", v_max);
-Command(s, cmd);
-ResponseCommand(s, "D:AR");
+cmd = sprintf("D:A%d,2000,40", v_max);
+Command(s_stage, cmd);
+ResponseCommand(s_stage, "D:AR");
 
-Command(s, "JGO:A+");
+Command(s_stage, "JGO:A+");
 
 
 while true
-    data = read(d, seconds(0.01));
+    data = read(daqStG, seconds(0.01));
     current = mean(data.Variables);
     error = target + current;
 
@@ -45,7 +45,7 @@ while true
     fprintf("Error: %.3f V\n", error);
 
     if error < 0.003
-        Command(s, "L:A");
+        Command(s_stage, "L:A");
         fprintf("✅ 目標に到達：停止--------------------\n");
         fprintf("Voltage: %.3f V\n", current);
         break;
@@ -53,14 +53,14 @@ while true
 
     for i = 1:length(thresholds)
         if error <= thresholds(i) && ~applied(i)
-            Command(s, "L:A");
+            Command(s_stage, "L:A");
             % ここで初めてこの段階に入ったときにだけ速度変更
             velocity = round(round(v_max * exp(-alpha * (0.6 - thresholds(i)))) / 10) * 10;
             velocity = min(max(velocity, v_min), v_max);
 
             cmd = sprintf("D:A%d,2000,400", velocity);
-            Command(s, cmd);
-            ResponseCommand(s, "D:AR");
+            Command(s_stage, cmd);
+            ResponseCommand(s_stage, "D:AR");
             fprintf("error <= %.1f → 速度変更：%d\n", thresholds(i), velocity);
 
             applied(i) = true;  % この段階の速度変更済として記録
@@ -68,13 +68,13 @@ while true
         end
     end
 
-    Command(s, "JGO:A+"); % 速度変更し、JOG移動
+    Command(s_stage, "JGO:A+"); % 速度変更し、JOG移動
 end
 pause(2)
-% Command(s, "MGO:A-1500");
+Command(s_stage, "AGO:A-2000");
 
 
-ResponseCommand(s, "D:AR");
+ResponseCommand(s_stage, "D:AR");
 
 
 function waitForStop(s)
