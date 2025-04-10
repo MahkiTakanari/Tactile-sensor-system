@@ -44,6 +44,15 @@ while true
     fprintf("Current Voltage: %.3f V\n", current);
     fprintf("Error: %.3f V\n", error);
 
+    if error < -0.5
+        Command(s_stage, "L:A");
+        fprintf("⚠️ オーバーシュート警告：error = %.3f V\n", error);
+        Command(s_stage, "AGO:A0");
+        applied(:) = false;  % 速度段階リセット
+        pause(1);  % 落ち着かせてから再試行
+        continue;
+    end
+
     if error < 0.003
         Command(s_stage, "L:A");
         fprintf("✅ 目標に到達：停止--------------------\n");
