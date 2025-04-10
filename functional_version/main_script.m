@@ -6,6 +6,8 @@ daqStG = daq("ni");
 addinput(daqStG, "cDAQ1Mod1", "ai0", "Voltage");
 daqStG.Rate = 5000;
 
+addpath("utility")
+
 % --- 試行ループ ---
 numTrials = 3;
 target = 0.6;
@@ -17,14 +19,19 @@ for trial = 1:numTrials
 
     % z軸上昇・押しつけ力制御
     controlStageForce(s_stage, daqStG, target);
+    pause(1);
 
     % ↓ここにPVDF計測やスライダ走査処理が入る↓
+    runSlider(s_slider, 29);
+    pause(1);
 
     % z軸下降
     lowerStage(s_stage);
 
     % スライダ初期化
-    runSlider(s_slider, 30);
+    runSlider(s_slider, 31);
 
     fprintf("✅ 試行 %d 終了\n", trial);
 end
+
+clear all
