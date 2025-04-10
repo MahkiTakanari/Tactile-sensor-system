@@ -12,7 +12,7 @@ target = 0.6;
 
 for trial = 1:numTrials
     fprintf("\n▶ 試行 %d 開始\n", trial);
-    runSlider(s_slider, 31);  % スライダ前進（押し当て位置）
+    runSlider(s_slider, 31);  % スライダ初期動作
     pause(2);
 
     % z軸上昇・押しつけ力制御

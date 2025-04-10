@@ -19,6 +19,15 @@ function controlStageForce(s, daqStG, target)
 
         fprintf("Voltage: %.3f V | Error: %.3f V\n", current, error);
 
+        if error < -0.5
+            commandWithWait(s, "L:A");
+            fprintf("⚠️ オーバーシュート警告：error = %.3f V\n", error);
+            commandWithWait(s, "AGO:A0");
+            applied(:) = false;  % 速度段階リセット
+            pause(1);  % 落ち着かせてから再試行
+            continue;
+        end
+
         if error < 0.003
             commandWithWait(s, "L:A");
             fprintf("✅ 目標に到達：停止\n");
@@ -31,9 +40,10 @@ function controlStageForce(s, daqStG, target)
 
                 velocity = round(round(v_max * exp(-alpha * (0.6 - thresholds(i)))) / 10) * 10;
                 velocity = min(max(velocity, v_min), v_max);
-                cmd = sprintf("D:A%d,2000,400", velocity);
 
+                cmd = sprintf("D:A%d,2000,400", velocity);
                 commandWithWait(s, cmd);
+                
                 fprintf("error <= %.2f → 速度変更: %d\n", thresholds(i), velocity);
                 applied(i) = true;
             end
