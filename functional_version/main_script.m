@@ -1,12 +1,12 @@
 % --- 初期化 ---
-s_stage = initStage("COM5");
-s_slider = initSlider("COM3");
+s_stage = stage.initStage("COM5");
+s_slider = slider.initSlider("COM3");
 
+% daqの関数化はできてない
 daqStG = daq("ni");
 addinput(daqStG, "cDAQ1Mod1", "ai0", "Voltage");
 daqStG.Rate = 5000;
 
-addpath("utility")
 
 % --- 試行ループ ---
 numTrials = 3;
@@ -14,22 +14,22 @@ target = 0.6;
 
 for trial = 1:numTrials
     fprintf("\n▶ 試行 %d 開始\n", trial);
-    runSlider(s_slider, 31);  % スライダ初期動作
+    slider.runSlider(s_slider, 31);  % スライダ初期動作
     pause(2);
 
     % z軸上昇・押しつけ力制御
-    controlStageForce(s_stage, daqStG, target);
+    stage.controlStageForce(s_stage, daqStG, target);
     pause(1);
 
     % ↓ここにPVDF計測やスライダ走査処理が入る↓
-    runSlider(s_slider, 29);
+    slier.runSlider(s_slider, 29);
     pause(1);
 
     % z軸下降
-    lowerStage(s_stage);
+    stage.lowerStage(s_stage);
 
     % スライダ初期化
-    runSlider(s_slider, 31);
+    slider.runSlider(s_slider, 31);
 
     fprintf("✅ 試行 %d 終了\n", trial);
 end
