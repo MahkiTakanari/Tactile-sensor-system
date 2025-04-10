@@ -1,0 +1,12 @@
+# MATLABのバックアップファイル
+*.asv
+
+# macOSが勝手に作るやつ
+.DS_Store
+
+# Windowsが勝手に作るやつ
+Thumbs.db
+
+# その他（例：logファイルなど）
+*.log
+*.bak
