@@ -141,8 +141,7 @@ end
 
 % Command(s, "MGO:A1750");
 writeline(s, "MGO:A1750")
-
-
+pause(0.02);
 
 
 function ResponseCommand(s, command)
