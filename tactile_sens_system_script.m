@@ -70,7 +70,6 @@ for trial = 1:numTrials
     applied = false(size(thresholds));  % 各段階で速度変更したかどうか記録
     Command(s_stage, "MGO:A1750");
     pause(0.3)
-    Command(s_stage, "JGO:A+");
 
     while true
         data = read(daqStG, seconds(0.01));
@@ -94,8 +93,11 @@ for trial = 1:numTrials
             fprintf("Voltage: %.3f V\n", current);
             break;
         end
+
+        Command(s_stage, "JGO:A+");
+
     
-        for i = 1:length(thresholds)
+        for i = 1:length(thresholds) % 速度変更処理
             if error <= thresholds(i) && ~applied(i)
                 Command(s_stage, "L:A");
                 % ここで初めてこの段階に入ったときにだけ速度変更
@@ -104,15 +106,15 @@ for trial = 1:numTrials
     
                 cmd = sprintf("D:A%d,2000,400", velocity);
                 Command(s_stage, cmd);
-                ResponseCommand(s_stage, "D:AR");
-                fprintf("error <= %.1f → 速度変更：%d\n", thresholds(i), velocity);
+                
+                fprintf("\nerror <= %.1f → 速度変更：%d\n", thresholds(i), velocity);
     
                 applied(i) = true;  % この段階の速度変更済として記録
                 % break;  % 一度に1段階だけ処理
             end
         end
     
-        Command(s_stage, "JGO:A+"); % 速度変更し、JOG移動
+        Command(s_stage, "JGO:A+"); % 速度変更後、JOG移動
     end
 
 
