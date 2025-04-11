@@ -10,9 +10,9 @@ slider.runSlider(s_slider, 31);
 disp("RESET: Stage & Slider position")
 
 % --- 試行ループ ---
-numTrials = 3;
-target = 0.6;
-duration = 1;
+numTrials = 3; % 試行回数
+target = 0.6; % 目標押付電圧
+duration = 1; % PVDF計測時間
 
 for trial = 1:numTrials
     fprintf("\n▶▶ 試行 %d 開始\n", trial);
@@ -28,12 +28,7 @@ for trial = 1:numTrials
     % 2. PVDF計測の開始
     % -----------------------
     disp("▶ PVDFセンサの計測開始");
-    % 計測スタート
-
-    start(daqPVDF, "Duration", seconds(duration));
-    data = read(daqPVDF, seconds(duration));
-    t = data.Time;
-    v = data.Variables;
+    [t, v] = PVDF.measPVDF(daqPVDF, duration);
 
     % -----------------------
     % 3. スライダ動作（走査）
@@ -41,12 +36,10 @@ for trial = 1:numTrials
     disp("▶ スライダ走査開始");
     slider.runSlider(s_slider, 29);
 
-    figure;
-    plot(t, v);
-    xlabel("time [s]");
-    ylabel("voltage [V]");
-    title("PVDF output");
-    grid on; box on;
+    % -----------------------
+    % 4. PVDF出力のグラフ生成
+    % -----------------------
+    PVDF.plotPVDF(t, v);
 
     % -----------------------
     % 4. z軸ステージを下降
