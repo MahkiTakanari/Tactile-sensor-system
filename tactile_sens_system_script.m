@@ -51,21 +51,21 @@ thresholds = [0.55, 0.35, 0.15, 0.05];
 
 cmd = sprintf("D:A%d,2000,400", v_max);
 writeline(s_stage, cmd);
-ResponseCommand(s_stage, "D:AR");
+% ResponseCommand(s_stage, "D:AR");
 
 
 
 
 
 for trial = 1:numTrials
-    fprintf("\n▶ 試行 %d 開始\n", trial);
+    fprintf("\n▶▶ 試行 %d 開始\n", trial);
     writeline(s_slider, "run 31");
     pause(2);
     
     % -----------------------
     % 1. 押しつけ力制御（z軸）
     % -----------------------
-    disp("z軸ステージ上昇 → 所望の押しつけ力を制御中...");
+    disp("▶ z軸ステージ上昇 → 所望の押しつけ力を制御中...");
     
     applied = false(size(thresholds));  % 各段階で速度変更したかどうか記録
     Command(s_stage, "MGO:A1750");
@@ -81,7 +81,7 @@ for trial = 1:numTrials
         if error < -0.5
             Command(s_stage, "L:A");
             fprintf("⚠️ オーバーシュート警告：error = %.3f V\n", error);
-            Command(s_stage, "AGO:A0");
+            Command(s_stage, "AGO:A-2000");
             applied(:) = false;  % 速度段階リセット
             pause(1);  % 落ち着かせてから再試行
             continue;
@@ -89,8 +89,7 @@ for trial = 1:numTrials
     
         if error < 0.003
             Command(s_stage, "L:A");
-            fprintf("✅ 目標に到達：停止--------------------\n");
-            fprintf("Voltage: %.3f V\n", current);
+            fprintf("✅ 目標に到達：停止------| Final Voltage: %.3f V |\n", current);
             break;
         end
 
@@ -107,7 +106,7 @@ for trial = 1:numTrials
                 cmd = sprintf("D:A%d,2000,400", velocity);
                 Command(s_stage, cmd);
                 
-                fprintf("\nerror <= %.1f → 速度変更：%d\n", thresholds(i), velocity);
+                fprintf("\n【error <= %.1f → 速度変更：%d】\n", thresholds(i), velocity);
     
                 applied(i) = true;  % この段階の速度変更済として記録
                 % break;  % 一度に1段階だけ処理
@@ -121,7 +120,7 @@ for trial = 1:numTrials
     % -----------------------
     % 2. PVDF計測の開始
     % -----------------------
-    disp("PVDFセンサの計測開始");
+    disp("▶ PVDFセンサの計測開始");
     % 計測スタート
     start(daqPVDF, "Duration", seconds(duration));
     data = read(daqPVDF, seconds(duration));
@@ -131,16 +130,23 @@ for trial = 1:numTrials
     % -----------------------
     % 3. スライダ動作（走査）
     % -----------------------
-    disp("スライダ走査開始");
+    disp("▶ スライダ走査開始");
     writeline(s_slider, "run 29");
 
     % 1秒待つ（走査完了まで）
     pause(2.0);
+    
+    figure;
+    plot(t, v);
+    xlabel("time [s]");
+    ylabel("voltage [V]");
+    title("PVDF output");
+    grid on; box on;
 
     % -----------------------
     % 4. z軸ステージを下降
     % -----------------------
-    disp("z軸ステージ下降");
+    disp("▶ z軸ステージ下降");
     % ここで、下降動作
     Command(s_stage, "D:A500,9000,400");
     Command(s_stage, "AGO:A-2000");
@@ -150,10 +156,10 @@ for trial = 1:numTrials
     % -----------------------
     % 5. スライダを初期位置へ
     % -----------------------
-    disp("スライダ初期位置へ戻る");
+    disp("▶ スライダ初期位置へ戻す");
     writeline(s_slider, "run 31");
 
-    % ※データはまだ保存しません
+    % ※データ保存はなし
     fprintf("✅ 試行 %d 終了\n", trial);
 end
 
@@ -183,5 +189,7 @@ function Command(s, command)
         end
     end
 end
+
+
 
 
