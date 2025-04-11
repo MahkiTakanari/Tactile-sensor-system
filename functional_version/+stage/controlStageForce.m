@@ -28,29 +28,28 @@ function controlStageForce(s, daqStG, target)
 
         elseif error < 0.003
             stage.commandWithWait(s, "L:A");
-            fprintf("✅ 目標に到達：停止\n");
+            fprintf("✅ 目標に到達：停止------| Final Voltage: %.3f V |\n", current);
             break;
 
         else        
             stage.commandWithWait(s, "JGO:A+");
             
-            for i = 1:length(thresholds)
+            for i = 1:length(thresholds) % 速度変更処理
                 if error <= thresholds(i) && ~applied(i)
                     stage.commandWithWait(s, "L:A");
-    
+                    % ここで初めてこの段階に入ったときにだけ速度変更
                     velocity = round(round(v_max * exp(-coef_alpha * (0.6 - thresholds(i)))) / 10) * 10;
                     velocity = min(max(velocity, v_min), v_max);
     
                     cmd = sprintf("D:A%d,2000,400", velocity);
                     stage.commandWithWait(s, cmd);
-                    
-                    fprintf("error <= %.2f → 速度変更: %d\n", thresholds(i), velocity);
-                    applied(i) = true;
+                    fprintf("\n【error <= %.1f → 速度変更：%d】\n", thresholds(i), velocity);
+                    applied(i) = true;  % この段階の速度変更済として記録
                 end
             end
         end
 
-        stage.commandWithWait(s, "JGO:A+");
+        stage.commandWithWait(s, "JGO:A+"); % 速度変更後、JOG移動
     end
     pause(1);
 end
