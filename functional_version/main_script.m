@@ -5,15 +5,16 @@ s_slider = utility.initSerial("COM3", "s_slider");
 daqStg = utility.initDaq("cDAQ1Mod1", "ai0", 5000, "daqStg");
 daqPVDF = utility.initDaq("Dev2", "ai1", 5000, "daqPVDF");
 
+stage.lowerStage(s_stage);
+slider.runSlider(s_slider, 31);
+disp("RESET: Stage & Slider position")
 
 % --- 試行ループ ---
 numTrials = 3;
 target = 0.6;
 
 for trial = 1:numTrials
-    fprintf("\n▶ 試行 %d 開始\n", trial);
-    slider.runSlider(s_slider, 31);  % スライダ初期動作
-    pause(2);
+    fprintf("\n▶▶ 試行 %d 開始\n", trial);
 
     % z軸上昇・押しつけ力制御
     stage.controlStageForce(s_stage, daqStG, target);

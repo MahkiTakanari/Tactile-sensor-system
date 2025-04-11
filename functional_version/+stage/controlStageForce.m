@@ -1,16 +1,16 @@
 function controlStageForce(s, daqStG, target)
-
+    % 速度変化閾値
+    thresholds = [0.55, 0.35, 0.15, 0.05];
+    % 各閾値の速度設定決定
     v_max = 500;
     v_min = 10;
     e_max = 0.6;
     e_min = 0.1;
-    alpha = -log(v_min / v_max) / (e_max - abs(e_min));
-    thresholds = [0.55, 0.35, 0.15, 0.05];
-    applied = false(size(thresholds));
-
-    commandWithWait(s, "MGO:A1750");
-    pause(0.3)
+    coef_alpha = -log(v_min / v_max) / (e_max - abs(e_min));
     
+    
+    % 速度更新判定用論理配列
+    applied = false(size(thresholds));
 
     while true
         data = read(daqStG, seconds(0.01));
@@ -40,7 +40,7 @@ function controlStageForce(s, daqStG, target)
             if error <= thresholds(i) && ~applied(i)
                 commandWithWait(s, "L:A");
 
-                velocity = round(round(v_max * exp(-alpha * (0.6 - thresholds(i)))) / 10) * 10;
+                velocity = round(round(v_max * exp(-coef_alpha * (0.6 - thresholds(i)))) / 10) * 10;
                 velocity = min(max(velocity, v_min), v_max);
 
                 cmd = sprintf("D:A%d,2000,400", velocity);
