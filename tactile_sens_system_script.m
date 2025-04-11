@@ -77,8 +77,7 @@ for trial = 1:numTrials
         current = mean(data.Variables);
         error = target + current;
     
-        fprintf("Current Voltage: %.3f V\n", current);
-        fprintf("Error: %.3f V\n", error);
+        fprintf("Voltage: %.3f V | Error: %.3f V\n", current, error);
 
         if error < -0.5
             Command(s_stage, "L:A");
@@ -150,7 +149,7 @@ for trial = 1:numTrials
     % 5. スライダを初期位置へ
     % -----------------------
     disp("スライダ初期位置へ戻る");
-    writeline(s_slider, "run 30");
+    writeline(s_slider, "run 31");
 
     % ※データはまだ保存しません
     fprintf("✅ 試行 %d 終了\n", trial);
