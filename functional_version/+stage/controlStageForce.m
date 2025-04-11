@@ -10,7 +10,7 @@ function controlStageForce(s, daqStG, target)
 
     commandWithWait(s, "MGO:A1750");
     pause(0.3)
-    commandWithWait(s, "JGO:A+");
+    
 
     while true
         data = read(daqStG, seconds(0.01));
@@ -33,7 +33,9 @@ function controlStageForce(s, daqStG, target)
             fprintf("✅ 目標に到達：停止\n");
             break;
         end
-
+        
+        commandWithWait(s, "JGO:A+");
+        
         for i = 1:length(thresholds)
             if error <= thresholds(i) && ~applied(i)
                 commandWithWait(s, "L:A");

@@ -1,11 +1,9 @@
 % --- 初期化 ---
-s_stage = stage.initStage("COM5");
-s_slider = slider.initSlider("COM3");
 
-% daqの関数化はできてない
-daqStG = daq("ni");
-addinput(daqStG, "cDAQ1Mod1", "ai0", "Voltage");
-daqStG.Rate = 5000;
+s_stage = utility.initSerial("COM5", "s_stage");
+s_slider = utility.initSerial("COM3", "s_slider");
+daqStg = utility.initDaq("cDAQ1Mod1", "ai0", 5000, "daqStg");
+daqPVDF = utility.initDaq("Dev2", "ai1", 5000, "daqPVDF");
 
 
 % --- 試行ループ ---
