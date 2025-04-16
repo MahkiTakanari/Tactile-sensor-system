@@ -1,17 +1,21 @@
+% 初期値設定
+numTrials = 3;
+target = 0.6;
+duration = 1;
+SamplingRate = 5000;
+
 % --- 初期化 ---
 stage = StageController("COM6");
 slider = SliderController("COM3");
-daqStG = utility.initDaq("cDAQ1Mod1", "ai0", 5000, "daqStG");
-daqPVDF = utility.initDaq("Dev2", "ai1", 5000, "daqPVDF");
+daqStG = utility.initDaq("cDAQ1Mod1", "ai0", SamplingRate, "daqStG");
+daqPVDF = utility.initDaq("Dev2", "ai1", SamplingRate, "daqPVDF");
 
 stage.lower();
 slider.runSeq(31);
 disp("RESET: Stage & Slider position")
 
 % --- 試行ループ ---
-numTrials = 3;
-target = 0.6;
-duration = 1;
+
 
 for trial = 1:numTrials
     fprintf("\n▶▶ 試行 %d 開始\n", trial);
