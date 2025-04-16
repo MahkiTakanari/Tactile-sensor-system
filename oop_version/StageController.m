@@ -10,26 +10,23 @@ classdef StageController
     end
 
     methods
-        % コンストラクタ
         function obj = StageController(port)
-            try
-                obj.s = serialport(port, 9600);
-                configureTerminator(obj.s, "CR/LF");
-                fprintf("SET: serialport on %s\n", port);
-            catch ME
-                if contains(ME.message, "already in use")
-                    warning("Port %s is already open. Attempting to reuse.", port);
-                    found = serialportfind("Port", port);
-                    if ~isempty(found) && isvalid(found(1))
-                        obj.s = found(1);
-                        fprintf("REUSE: existing serialport on %s\n", port);
-                    else
-                        error("Port %s is already in use, but no valid object found.", port);
-                    end
-                else
-                    rethrow(ME);
+            % まず再利用できる serialport オブジェクトがあるか確認
+            found = serialportfind("Port", port);
+            if ~isempty(found) && isvalid(found(1))
+                obj.s = found(1);
+                fprintf("REUSE: existing serialport on %s\n", port);
+            else
+                % serialport を新しく開く（ここでしか例外の可能性が残らない）
+                try
+                    obj.s = serialport(port, 9600);
+                    configureTerminator(obj.s, "CR/LF");
+                    fprintf("SET: serialport on %s\n", port);
+                catch ME
+                    rethrow(ME);  % 再利用不可かつ開けない → 本当のエラー
                 end
             end
+
             obj.coef_alpha = -log(obj.v_min / obj.v_max) / (obj.e_max - abs(obj.e_min));
         end
 

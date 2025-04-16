@@ -1,6 +1,6 @@
 % --- 初期化 ---
-% stage = StageController("COM6");
-% slider = SliderController("COM3");
+stage = StageController("COM6");
+slider = SliderController("COM3");
 daqStG = utility.initDaq("cDAQ1Mod1", "ai0", 5000, "daqStG");
 daqPVDF = utility.initDaq("Dev2", "ai1", 5000, "daqPVDF");
 
