@@ -56,10 +56,10 @@ classdef StageController
                 error = target + current;
                 fprintf("Voltage: %.3f V | Error: %.3f V\n", current, error);
 
-                if error < -0.5
+                if error < -0.05
                     obj.commandWithWait("L:A");
                     fprintf("\n⚠️ オーバーシュート警告：%.3f V\n", error);
-                    obj.commandWithWait("AGO:A-2000");
+                    obj.commandWithWait("AGO:A0");
                     applied(:) = false;
                     pause(2);
                     continue;
@@ -87,8 +87,8 @@ classdef StageController
 
         function lower(obj)
             obj.commandWithWait("D:A500,9000,400");
-            obj.commandWithWait("AGO:A-2000");
-            pause(1);
+            obj.commandWithWait("AGO:A0");
+            pause(0.3);
         end
     end
 end
