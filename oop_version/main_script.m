@@ -14,14 +14,23 @@ stage.lower();
 slider.runSeq(31);
 disp("RESET: Stage & Slider position")
 
+z_contact = [];
+
 % --- 試行ループ ---
-
-
 for trial = 1:numTrials
     fprintf("\n▶▶ 試行 %d 開始\n", trial);
-
-    disp("▶ z軸ステージ上昇 → 所望の押しつけ力を制御中...");
-    stage.controlForce(daqStG, target);
+    
+    if trial == 1
+        disp("▶ 接触位置記録上昇");
+        z_contact = stage.controlForce(daqStG, target);
+    else
+        disp("▶ 接触位置まで移動");
+        stage.goToZ(z_contact);
+        pause(0.5);
+        
+        disp("▶ z軸ステージ上昇 → 所望の押しつけ力を制御中...");
+        stage.controlForce(daqStG, target);
+    end
 
     disp("▶ PVDFセンサの計測開始");
     [t, v] = PVDFHandler.meas(daqPVDF, duration);

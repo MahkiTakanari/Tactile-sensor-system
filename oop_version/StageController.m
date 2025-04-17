@@ -10,6 +10,7 @@ classdef StageController
     end
 
     methods
+        % コンストラクタ
         function obj = StageController(port)
             % まず再利用できる serialport オブジェクトがあるか確認
             found = serialportfind("Port", port);
@@ -45,13 +46,24 @@ classdef StageController
             end
         end
 
-        function controlForce(obj, daqStG, target)
+        function z = controlForce(obj, daqStG, target)
             applied = false(size(obj.thresholds));
+            contactSaved = false;
+            z_contact = NaN;
+
             while true
                 data = read(daqStG, seconds(0.01));
                 current = mean(data.Variables);
                 error = target + current;
+
                 fprintf("Voltage: %.3f V | Error: %.3f V\n", current, error);
+
+                if ~contactSaved && current < -0.07
+                    obj.commandWithWait("L:A");
+                    z_contact = obj.getCurrentZ();
+                    contactSaved = true;
+                    fprintf("📍 接触点検出：Z = %d（current = %.3f）\n", z_contact, current);
+                end
 
                 if error < -0.05
                     obj.commandWithWait("L:A");
@@ -80,6 +92,21 @@ classdef StageController
                 obj.commandWithWait("JGO:A+");
             end
             pause(1);
+
+            if nargout > 0
+                z = z_contact;
+            end
+        end
+
+        function z = getCurrentZ(obj)
+            writeline(obj.s, "Q:A1");
+            z = readline(obj.s);
+        end
+
+        function goToZ(obj, z)
+            z = z - 200; % 接触位置から200下げる
+            cmd = sprintf("AGO:A%d", z);
+            obj.commandWithWait(cmd);
         end
 
         function lower(obj)
